@@ -231,6 +231,8 @@ private:
   ndn::EventId m_refreshPanelId;
   shared_ptr<chronosync::Socket> m_sock; // SyncSocket
 
+
+
   ChatroomList m_chatroomList;
   std::mutex m_resumeMutex;
   std::mutex m_nfdConnectionMutex;

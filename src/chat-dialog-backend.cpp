@@ -23,6 +23,7 @@
 
 INIT_LOGGER("ChatDialogBackend");
 
+
 namespace chronochat {
 
 static const time::milliseconds FRESHNESS_PERIOD(60000);
@@ -111,7 +112,7 @@ ChatDialogBackend::run()
 void
 ChatDialogBackend::initializeSync()
 {
-  BOOST_ASSERT(m_sock == nullptr);
+  //BOOST_ASSERT(m_sock == nullptr);
 
   m_face = make_shared<ndn::Face>();
   m_scheduler = unique_ptr<ndn::Scheduler>(new ndn::Scheduler(m_face->getIoService()));
@@ -138,13 +139,25 @@ ChatDialogBackend::initializeSync()
     m_validator = shared_ptr<ndn::Validator>();
 
 
+  Name  nicko = Name();
+  nicko.append(m_nick);
+  std::random_device rdevice;
+
+
+  ndn::KeyChain m_keychain;
+
+  node = make_shared<ndn::vsync::Node>(ref(*m_face), ref(*m_scheduler), m_keychain, nicko, static_cast<uint32_t>(rdevice()));
+
+
+  node->ConnectDataSignal(std::bind(&ChatDialogBackend::processChatData, this, _1));
+  node->Start();
   // create a new SyncSocket
-  m_sock = make_shared<chronosync::Socket>(m_chatroomPrefix,
+  /*m_sock = make_shared<chronosync::Socket>(m_chatroomPrefix,
                                            m_routableUserChatPrefix,
                                            ref(*m_face),
                                            bind(&ChatDialogBackend::processSyncUpdate, this, _1),
                                            m_signingId,
-                                           m_validator);
+                                           m_validator); */
 
   // schedule a new join event
   m_scheduler->scheduleEvent(time::milliseconds(600),
@@ -206,13 +219,13 @@ ChatDialogBackend::close()
   m_helloEventId.reset();
   m_roster.clear();
   m_validator.reset();
-  m_sock.reset();
+  //m_sock.reset();
 }
 
 void
-ChatDialogBackend::processSyncUpdate(const std::vector<chronosync::MissingDataInfo>& updates)
+ChatDialogBackend::processSyncUpdate(const ndn::shared_ptr<const ndn::Data>& data)
 {
-  _LOG_DEBUG("<<< processing Tree Update");
+/*  _LOG_DEBUG("<<< processing Tree Update");
 
   if (updates.empty()) {
     return;
@@ -260,13 +273,11 @@ ChatDialogBackend::processSyncUpdate(const std::vector<chronosync::MissingDataIn
 
   // reflect the changes on GUI
   emit syncTreeUpdated(nodeInfos,
-                       QString::fromStdString(getHexEncodedDigest(m_sock->getRootDigest())));
+                       sb);   */
 }
 
 void
-ChatDialogBackend::processChatData(const ndn::shared_ptr<const ndn::Data>& data,
-                                   bool needDisplay,
-                                   bool isValidated)
+ChatDialogBackend::processChatData(const ndn::shared_ptr<const ndn::Data>& data)
 {
   ChatMessage msg;
 
@@ -282,30 +293,30 @@ ChatDialogBackend::processChatData(const ndn::shared_ptr<const ndn::Data>& data,
     return;
   }
 
-  Name remoteSessionPrefix = data->getName().getPrefix(-1);
+  //Name remoteSessionPrefix = data->getName().getPrefix(-1);
 
   if (msg.getMsgType() == ChatMessage::LEAVE) {
-    BackendRoster::iterator it = m_roster.find(remoteSessionPrefix);
+    //BackendRoster::iterator it = m_roster.find(remoteSessionPrefix);
 
-    if (it != m_roster.end()) {
+    //if (it != m_roster.end()) {
       // cancel timeout event
-      if (static_cast<bool>(it->second.timeoutEventId))
-        m_scheduler->cancelEvent(it->second.timeoutEventId);
+      //if (static_cast<bool>(it->second.timeoutEventId))
+        //m_scheduler->cancelEvent(it->second.timeoutEventId);
 
       // notify frontend to remove the remote session (node)
-      emit sessionRemoved(QString::fromStdString(remoteSessionPrefix.toUri()),
-                          QString::fromStdString(msg.getNick()),
-                          msg.getTimestamp());
+      //emit sessionRemoved(QString::fromStdString(remoteSessionPrefix.toUri()),
+      //                    QString::fromStdString(msg.getNick()),
+      //                    msg.getTimestamp());
 
       // remove roster entry
-      m_roster.erase(remoteSessionPrefix);
+      //m_roster.erase(remoteSessionPrefix);
 
-      emit eraseInRoster(remoteSessionPrefix.getPrefix(IDENTITY_OFFSET),
-                         Name::Component(m_chatroomName));
-    }
+      //emit eraseInRoster(remoteSessionPrefix.getPrefix(IDENTITY_OFFSET),
+      //                   Name::Component(m_chatroomName));
+    //}
   }
   else {
-    BackendRoster::iterator it = m_roster.find(remoteSessionPrefix);
+    /*BackendRoster::iterator it = m_roster.find(remoteSessionPrefix);
 
     if (it == m_roster.end()) {
       // Should not happen
@@ -323,23 +334,23 @@ ChatDialogBackend::processChatData(const ndn::shared_ptr<const ndn::Data>& data,
       m_scheduler->scheduleEvent(HELLO_INTERVAL * 3,
                                  bind(&ChatDialogBackend::remoteSessionTimeout,
                                       this, remoteSessionPrefix));
-
+    */
     // If chat message, notify the frontend
     if (msg.getMsgType() == ChatMessage::CHAT) {
-      if (isValidated)
+      //if (isValidated)
         emit chatMessageReceived(QString::fromStdString(msg.getNick()),
                                  QString::fromStdString(msg.getData()),
                                  msg.getTimestamp());
-      else
-        emit chatMessageReceived(QString::fromStdString(msg.getNick() + " (Unverified)"),
-                                 QString::fromStdString(msg.getData()),
-                                 msg.getTimestamp());
+      //else
+        //emit chatMessageReceived(QString::fromStdString(msg.getNick() + " (Unverified)"),
+          //                       QString::fromStdString(msg.getData()),
+            //                     msg.getTimestamp());
     }
 
     // Notify frontend to plot notification on DigestTree.
 
     // If we haven't got any message from this session yet.
-    if (m_roster[remoteSessionPrefix].hasNick == false) {
+    /*if (m_roster[remoteSessionPrefix].hasNick == false) {
       m_roster[remoteSessionPrefix].userNick = msg.getNick();
       m_roster[remoteSessionPrefix].hasNick = true;
 
@@ -357,7 +368,7 @@ ChatDialogBackend::processChatData(const ndn::shared_ptr<const ndn::Data>& data,
                            QString::fromStdString(msg.getNick()),
                            seqNo,
                            msg.getTimestamp(),
-                           false);
+                           false);*/
   }
 }
 
@@ -383,22 +394,24 @@ void
 ChatDialogBackend::sendMsg(ChatMessage& msg)
 {
   // send msg
-  ndn::Block buf = msg.wireEncode();
+  //ndn::Block buf = msg.wireEncode();
+  QString sb = "Berl";
 
-  uint64_t nextSequence = m_sock->getLogic().getSeqNo() + 1;
 
-  m_sock->publishData(buf.wire(), buf.size(), FRESHNESS_PERIOD);
+
+  uint64_t nextSequence = 0;
+
+  node->PublishData(msg.getData(),0);
 
   std::vector<NodeInfo> nodeInfos;
-  Name sessionName = m_sock->getLogic().getSessionName();
-  NodeInfo nodeInfo = {QString::fromStdString(sessionName.toUri()),
-                       nextSequence};
+  //Name sessionName = m_sock->getLogic().getSessionName();
+  NodeInfo nodeInfo = {sb};
   nodeInfos.push_back(nodeInfo);
 
   emit syncTreeUpdated(nodeInfos,
-                       QString::fromStdString(getHexEncodedDigest(m_sock->getRootDigest())));
+                       sb);
 
-  emit messageReceived(QString::fromStdString(sessionName.toUri()),
+  emit messageReceived(sb,
                        QString::fromStdString(msg.getNick()),
                        nextSequence,
                        msg.getTimestamp(),

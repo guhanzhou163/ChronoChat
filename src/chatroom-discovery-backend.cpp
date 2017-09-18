@@ -101,7 +101,7 @@ ChatroomDiscoveryBackend::run()
 void
 ChatroomDiscoveryBackend::initializeSync()
 {
-  BOOST_ASSERT(m_sock == nullptr);
+  //BOOST_ASSERT(m_sock == nullptr);
 
   m_face = shared_ptr<ndn::Face>(new ndn::Face);
   m_scheduler = unique_ptr<ndn::Scheduler>(new ndn::Scheduler(m_face->getIoService()));

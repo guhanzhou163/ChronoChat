@@ -1,7 +1,4 @@
-[submodule "ChronoSync"]
-	path = ChronoSync
-	url = ../ChronoSync.git
-	branch = master
 [submodule "VectorSync"]
 	path = VectorSync
-	url = https://github.com/guhanzhou163/VectorSync
+	url = ../VectorSync.git
+	branch = master

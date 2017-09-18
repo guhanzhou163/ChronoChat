@@ -19,7 +19,10 @@
 #include "chat-message.hpp"
 #include <mutex>
 #include <socket.hpp>
+#include "node.hpp"
 #include <boost/thread.hpp>
+#include <functional>
+#include <random>
 #endif
 
 namespace chronochat {
@@ -27,7 +30,7 @@ namespace chronochat {
 class NodeInfo {
 public:
   QString sessionPrefix;
-  chronosync::SeqNo seqNo;
+
 };
 
 class UserInfo {
@@ -71,12 +74,10 @@ private:
   close();
 
   void
-  processSyncUpdate(const std::vector<chronosync::MissingDataInfo>& updates);
+  processSyncUpdate(const ndn::shared_ptr<const ndn::Data>& data);
 
   void
-  processChatData(const ndn::shared_ptr<const ndn::Data>& data,
-                  bool needDisplay,
-                  bool isValidated);
+  processChatData(const ndn::shared_ptr<const ndn::Data>& data);
 
   void
   remoteSessionTimeout(const Name& sessionPrefix);
@@ -168,12 +169,18 @@ private:
   std::string m_chatroomName;            // chatroom name
   std::string m_nick;                    // user nick
 
+
   Name m_signingId;                      // signing identity
   shared_ptr<ndn::Validator> m_validator;// validator
-  shared_ptr<chronosync::Socket> m_sock; // SyncSocket
+  //shared_ptr<chronosync::Socket> m_sock; // SyncSocket
 
   unique_ptr<ndn::Scheduler> m_scheduler;// scheduler
   ndn::EventId m_helloEventId;           // event id of timeout
+
+
+  shared_ptr<ndn::vsync::Node> node;
+
+
 
   bool m_joined;                         // true if in a chatroom
 
@@ -182,6 +189,7 @@ private:
   std::mutex m_resumeMutex;
   std::mutex m_nfdConnectionMutex;
 };
+
 
 } // namespace chronochat
 
