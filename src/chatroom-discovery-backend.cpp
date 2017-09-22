@@ -142,7 +142,7 @@ ChatroomDiscoveryBackend::close()
   m_sock.reset();
 }
 
-void
+/*void
 ChatroomDiscoveryBackend::processSyncUpdate(const std::vector<chronosync::MissingDataInfo>& updates)
 {
   if (updates.empty()) {
@@ -152,7 +152,7 @@ ChatroomDiscoveryBackend::processSyncUpdate(const std::vector<chronosync::Missin
     m_sock->fetchData(update.session, update.high,
                       bind(&ChatroomDiscoveryBackend::processChatroomData, this, _1), 2);
   }
-}
+}*/
 
 void
 ChatroomDiscoveryBackend::processChatroomData(const ndn::shared_ptr<const ndn::Data>& data)
@@ -253,7 +253,7 @@ ChatroomDiscoveryBackend::randomSessionTimeout(const Name::Component& chatroomNa
 {
   Name prefix = m_routableUserDiscoveryPrefix;
   prefix.append(chatroomName);
-  m_sock->addSyncNode(prefix);
+  //m_sock->addSyncNode(prefix);
 
   emit chatroomInfoRequest(chatroomName.toUri(), true);
 }
@@ -269,7 +269,7 @@ ChatroomDiscoveryBackend::sendUpdate(const Name::Component& chatroomName)
       m_scheduler->cancelEvent(it->second.helloTimeoutEventId);
     }
 
-    m_sock->publishData(buf.wire(), buf.size(), FRESHNESS_PERIOD, it->second.chatroomPrefix);
+    //m_sock->publishData(buf.wire(), buf.size(), FRESHNESS_PERIOD, it->second.chatroomPrefix);
 
     it->second.helloTimeoutEventId =
       m_scheduler->scheduleEvent(HELLO_INTERVAL,

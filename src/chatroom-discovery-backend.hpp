@@ -71,8 +71,8 @@ private:
   void
   close();
 
-  void
-  processSyncUpdate(const std::vector<chronosync::MissingDataInfo>& updates);
+  //void
+  //processSyncUpdate(const std::vector<chronosync::MissingDataInfo>& updates);
 
   void
   processChatroomData(const ndn::shared_ptr<const ndn::Data>& data);
