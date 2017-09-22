@@ -214,6 +214,7 @@ private:
 
   typedef std::map<ndn::Name::Component, ChatroomInfoBackend> ChatroomList;
 
+
   bool m_shouldResume;
   bool m_isNfdConnected;
   Name m_discoveryPrefix;
@@ -229,9 +230,9 @@ private:
 
   unique_ptr<ndn::Scheduler> m_scheduler;            // scheduler
   ndn::EventId m_refreshPanelId;
-  shared_ptr<chronosync::Socket> m_sock; // SyncSocket
+  //shared_ptr<chronosync::Socket> m_sock; // SyncSocket
 
-
+  shared_ptr<ndn::vsync::Node> node;
 
   ChatroomList m_chatroomList;
   std::mutex m_resumeMutex;

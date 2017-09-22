@@ -106,11 +106,24 @@ ChatroomDiscoveryBackend::initializeSync()
   m_face = shared_ptr<ndn::Face>(new ndn::Face);
   m_scheduler = unique_ptr<ndn::Scheduler>(new ndn::Scheduler(m_face->getIoService()));
 
-  m_sock = make_shared<chronosync::Socket>(m_discoveryPrefix,
-                                           Name(),
-                                           ref(*m_face),
-                                           bind(&ChatroomDiscoveryBackend::processSyncUpdate,
-                                                this, _1));
+  Name  nicko = Name();
+  nicko.append(m_nick);
+  std::random_device rdevice;
+
+
+  ndn::KeyChain m_keychain;
+
+  node = make_shared<ndn::vsync::Node>(ref(*m_face), ref(*m_scheduler), m_keychain, nicko, static_cast<uint32_t>(rdevice()));
+
+
+  node->ConnectDataSignal(std::bind(&ChatDialogBackend::processChatData, this, _1));
+  node->Start();
+  m_face->processEvents();
+  //m_sock = make_shared<chronosync::Socket>(m_discoveryPrefix,
+  //                                         Name(),
+  //                                         ref(*m_face),
+  //                                         bind(&ChatroomDiscoveryBackend::processSyncUpdate,
+  //                                              this, _1));
 
   // add an timer to refresh front end
   if (m_refreshPanelId != nullptr) {
