@@ -151,6 +151,7 @@ ChatDialogBackend::initializeSync()
 
   node->ConnectDataSignal(std::bind(&ChatDialogBackend::processChatData, this, _1));
   node->Start();
+  m_face->processEvents();
   // create a new SyncSocket
   /*m_sock = make_shared<chronosync::Socket>(m_chatroomPrefix,
                                            m_routableUserChatPrefix,
@@ -295,6 +296,9 @@ ChatDialogBackend::processChatData(const ndn::shared_ptr<const ndn::Data>& data)
 
   //Name remoteSessionPrefix = data->getName().getPrefix(-1);
 
+  emit chatMessageReceived( QString::fromStdString("abcd"),
+                           QString::fromStdString("cdef"),
+                           0);
   if (msg.getMsgType() == ChatMessage::LEAVE) {
     //BackendRoster::iterator it = m_roster.find(remoteSessionPrefix);
 
@@ -401,7 +405,7 @@ ChatDialogBackend::sendMsg(ChatMessage& msg)
 
   uint64_t nextSequence = 0;
 
-  node->PublishData(msg.getData(),0);
+  node->PublishData(msg.getData());
 
   std::vector<NodeInfo> nodeInfos;
   //Name sessionName = m_sock->getLogic().getSessionName();

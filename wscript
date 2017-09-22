@@ -68,6 +68,7 @@ def build (bld):
           includes = "VectorSync/lib",
           export_includes = "VectorSync/lib",
           use = 'NDN_CXX BOOST',
+          cxxflags = '-DBOOST_LOG_DYN_LINK'
           )
     print "34"
 
